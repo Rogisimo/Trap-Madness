@@ -1,26 +1,32 @@
+using TMPro;
 using UnityEngine;
+using UnityEngine.UI; // Include the UI namespace for working with UI elements
 
 public class Player : MonoBehaviour
 {
     public float speed = 5.0f;
     public float jumpForce = 10.0f;
     private Rigidbody2D rb;
-    private bool isGrounded = true;
+    public bool isGrounded = true;
     private int extraJumps;
     public int extraJumpsValue = 1;
-    public int health = 3;
-    private bool facingRight = true; // For determining which way the player is currently facing.
-    private Animator animator; // Animator variable
-
-    public Transform groundCheck; // Assign in the inspector
-    public float groundCheckRadius = 0.2f; // Radius of the overlap circle
-    public LayerMask whatIsGround; // Assign in the inspector, set to the ground layer
+    public int health = 3; // Player's health
+    private bool facingRight = true;
+    private Animator animator;
+    public Transform groundCheck;
+    public float groundCheckRadius = 0.2f;
+    public LayerMask whatIsGround;
+    public int score = 0;
+    public Image[] hearts; // Array to store the heart UI elements
+    public TextMeshProUGUI scoreText;
 
     void Start()
     {
         rb = GetComponent<Rigidbody2D>();
         extraJumps = extraJumpsValue;
-        animator = GetComponent<Animator>(); // Get the Animator component attached to the player
+        animator = GetComponent<Animator>();
+        UpdateHearts(); // Initialize the hearts UI
+        scoreText.text = score.ToString();
     }
 
     private void FixedUpdate()
@@ -30,7 +36,6 @@ public class Player : MonoBehaviour
 
     void Update()
     {
-
         isGrounded = Physics2D.OverlapCircle(groundCheck.position, groundCheckRadius, whatIsGround);
         if (health <= 0)
         {
@@ -38,31 +43,27 @@ public class Player : MonoBehaviour
             return; // Stop further execution if player is dead
         }
 
-        if(isGrounded){
+        if (isGrounded)
+        {
             animator.SetBool("Falling", false);
         }
 
-
-        // Jump if space is pressed and either on the ground or have extra jumps left
         if (Input.GetButtonDown("Jump"))
         {
             if (isGrounded)
             {
                 Jump();
                 animator.SetTrigger("Jump");
-                // Reset extra jumps when jumping from the ground
                 extraJumps = extraJumpsValue;
             }
             else if (extraJumps > 0)
             {
                 Jump();
-                // Decrease extra jumps if jumping in the air
                 extraJumps--;
-                animator.SetTrigger("DoubleJump"); // Trigger double jump animation
+                animator.SetTrigger("DoubleJump");
             }
         }
 
-        // Check if the player is falling
         if (rb.velocity.y < 0 && !isGrounded)
         {
             animator.SetBool("Falling", true);
@@ -76,7 +77,6 @@ public class Player : MonoBehaviour
         Vector2 movement = new Vector2(moveHorizontal, 0);
         rb.velocity = new Vector2(movement.x * speed, rb.velocity.y);
 
-        // Set the running animation speed parameter
         animator.SetFloat("Speed", Mathf.Abs(moveHorizontal));
 
         if (moveHorizontal > 0 && !facingRight)
@@ -99,11 +99,11 @@ public class Player : MonoBehaviour
         transform.localScale = theScale;
     }
 
-
     public void TakeDamage(int damage)
     {
         health -= damage;
-        animator.SetTrigger("Hurt"); // Trigger hit animation
+        animator.SetTrigger("Hurt");
+        UpdateHearts(); // Update the hearts UI
         if (health <= 0)
         {
             Death();
@@ -113,16 +113,39 @@ public class Player : MonoBehaviour
     void Death()
     {
         Debug.Log("Game Over");
-        // Optionally, trigger death animation
         animator.SetTrigger("Death");
-        // Disable player movement or other actions
         this.enabled = false;
-        Destroy(this.gameObject);
+        Destroy(gameObject);
     }
 
-    private void OnTriggerEnter2D(Collider2D other) {
-        if(other.gameObject.tag == "Spike"){
+    private void OnTriggerEnter2D(Collider2D other)
+    {
+        if (other.gameObject.CompareTag("Spike"))
+        {
             TakeDamage(1);
+        }
+    }
+
+    public void UpdateScore(int scoreToAdd){
+        score += scoreToAdd;
+        scoreText.text = score.ToString();
+    }
+
+    // Updates the heart UI to match the current health
+    void UpdateHearts()
+    {
+        // Loop through all hearts
+        for (int i = 0; i < hearts.Length; i++)
+        {
+            // If the current index is less than the current health, heart is enabled
+            if (i < health)
+            {
+                hearts[i].enabled = true;
+            }
+            else // Otherwise, disable the heart
+            {
+                hearts[i].enabled = false;
+            }
         }
     }
 
