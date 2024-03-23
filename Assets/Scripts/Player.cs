@@ -5,7 +5,7 @@ public class Player : MonoBehaviour
     public float speed = 5.0f;
     public float jumpForce = 10.0f;
     private Rigidbody2D rb;
-    public bool isGrounded = true;
+    private bool isGrounded = true;
     private int extraJumps;
     public int extraJumpsValue = 1;
     public int health = 3;
@@ -103,7 +103,7 @@ public class Player : MonoBehaviour
     public void TakeDamage(int damage)
     {
         health -= damage;
-        animator.SetTrigger("Hit"); // Trigger hit animation
+        animator.SetTrigger("Hurt"); // Trigger hit animation
         if (health <= 0)
         {
             Death();
@@ -117,5 +117,13 @@ public class Player : MonoBehaviour
         animator.SetTrigger("Death");
         // Disable player movement or other actions
         this.enabled = false;
+        Destroy(this.gameObject);
     }
+
+    private void OnTriggerEnter2D(Collider2D other) {
+        if(other.gameObject.tag == "Spike"){
+            TakeDamage(1);
+        }
+    }
+
 }
