@@ -19,6 +19,7 @@ public class Player : MonoBehaviour
     public int score = 0;
     public Image[] hearts; // Array to store the heart UI elements
     public TextMeshProUGUI scoreText;
+    public GameObject gameOverScreen;
 
     void Start()
     {
@@ -27,6 +28,7 @@ public class Player : MonoBehaviour
         animator = GetComponent<Animator>();
         UpdateHearts(); // Initialize the hearts UI
         scoreText.text = score.ToString();
+        
     }
 
     private void FixedUpdate()
@@ -41,11 +43,6 @@ public class Player : MonoBehaviour
         {
             Death();
             return; // Stop further execution if player is dead
-        }
-
-        if (isGrounded)
-        {
-            animator.SetBool("Falling", false);
         }
 
         if (Input.GetButtonDown("Jump"))
@@ -68,6 +65,9 @@ public class Player : MonoBehaviour
         {
             animator.SetBool("Falling", true);
         }
+        else if(rb.velocity.y > 0 || isGrounded){
+            animator.SetBool("Falling", false);
+        }
     }
 
     void MovePlayer()
@@ -88,6 +88,7 @@ public class Player : MonoBehaviour
     void Jump()
     {
         rb.velocity = Vector2.up * jumpForce;
+        FindObjectOfType<AudioManager>().Play("Jump");
         isGrounded = false;
     }
 
@@ -103,6 +104,7 @@ public class Player : MonoBehaviour
     {
         health -= damage;
         animator.SetTrigger("Hurt");
+        FindObjectOfType<AudioManager>().Play("Hit");
         UpdateHearts(); // Update the hearts UI
         if (health <= 0)
         {
@@ -114,6 +116,9 @@ public class Player : MonoBehaviour
     {
         Debug.Log("Game Over");
         animator.SetTrigger("Death");
+        FindObjectOfType<AudioManager>().Play("GameOver");
+        gameOverScreen.SetActive(true);
+        Time.timeScale = 0f;
         this.enabled = false;
         Destroy(gameObject);
     }
@@ -127,6 +132,7 @@ public class Player : MonoBehaviour
     }
 
     public void UpdateScore(int scoreToAdd){
+        FindObjectOfType<AudioManager>().Play("PickUp");
         score += scoreToAdd;
         scoreText.text = score.ToString();
     }
