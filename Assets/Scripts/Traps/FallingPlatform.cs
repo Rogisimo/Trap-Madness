@@ -1,29 +1,29 @@
+using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 
 public class FallingPlatform : MonoBehaviour
 {
-    public float fallDelay = 0.5f; // Delay before the platform falls
-    private Rigidbody2D rb2d;
-    private bool isGrounded;
-    Player player;
+    public float fallDelay = 0.5f;
+    private Rigidbody2D rb;
+    private Player player;
 
+    // Start is called before the first frame update
     void Start()
     {
+        rb = GetComponent<Rigidbody2D>();
         player = FindObjectOfType<Player>();
-        rb2d = GetComponent<Rigidbody2D>();
     }
 
-  void OnCollisionEnter2D(Collision2D other)
-    {
-        if (other.gameObject.CompareTag("Player") && player.isGrounded) // Check if the colliding object is the player
-        {
-            Invoke("StartFalling", fallDelay); // Start falling after a delay
+    void StartFalling(){
+        rb.bodyType = RigidbodyType2D.Dynamic;
+    }
+
+    private void OnCollisionEnter2D(Collision2D other) {
+        if(other.gameObject.tag == "Player" && player.isGrounded){
+            Invoke("StartFalling",fallDelay);
         }
     }
 
-    void StartFalling()
-    {
-        rb2d.bodyType = RigidbodyType2D.Dynamic; // Change body type to dynamic to enable gravity
-        // Optional: Add any additional effects here (like shaking, sound, etc.)
-    }
+   
 }
