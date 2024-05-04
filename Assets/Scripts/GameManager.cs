@@ -8,5 +8,6 @@ public class GameManager : MonoBehaviour
     public void PlayAgain(){
         Time.timeScale = 1f;
         SceneManager.LoadScene("Level1");
+        FindObjectOfType<AudioManager>().PlayLoop("MainMusic");
     }
 }

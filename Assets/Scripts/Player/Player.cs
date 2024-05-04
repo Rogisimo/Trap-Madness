@@ -102,6 +102,7 @@ public class Player : MonoBehaviour
     }
 
     void Jump(){
+        FindObjectOfType<AudioManager>().Play("Jump");
         rb.velocity = Vector2.up * jumpForce;
         isGrounded = false;
     }
@@ -115,6 +116,7 @@ public class Player : MonoBehaviour
     }
 
     public void TakeDamage(int damage){
+        FindObjectOfType<AudioManager>().Play("Hit");
         health -= damage;
         anim.SetTrigger("Hit");
         UpdateHearts();
@@ -125,11 +127,14 @@ public class Player : MonoBehaviour
     }
 
     public void UpdateScore(int scoreToAdd){
+        FindObjectOfType<AudioManager>().Play("PickUp");
         score += scoreToAdd;
         scoreText.text = score.ToString() + "X";
     }
 
     void Death(){
+        FindObjectOfType<AudioManager>().Play("GameOver");
+        FindObjectOfType<AudioManager>().Stop("MainMusic");
         gameOverScreen.SetActive(true);
         Time.timeScale = 0f;
     }
